@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ELM models for Codex</title>
+<style>
+  :root { color-scheme: light dark; font: 17px/1.6 system-ui, sans-serif; }
+  body { max-width: 760px; margin: 10vh auto; padding: 0 24px; }
+  h1 { line-height: 1.2; }
+  code { font-size: .9em; overflow-wrap: anywhere; }
+  pre { overflow-x: auto; padding: 18px; border: 1px solid #8886; border-radius: 8px; }
+  a { color: light-dark(#1753bb, #9cc2ff); }
+  footer { margin-top: 40px; font-size: .9em; }
+</style>
+<main>
+  <h1>ELM models for Codex</h1>
+  <p>A coding model catalog built from ELM's live model inventory and the latest
+    stable OpenAI Codex release, with specialized noncoding models filtered out.</p>
+  <pre><code>model_catalog_url = "https://flygoat.github.io/elm-models-codex/models.json"</code></pre>
+  <p>Add this setting inside your existing <code>[model_providers.elm]</code> table,
+    or start with the example configuration below.</p>
+  <ul>
+    <li><a href="models.json">Model catalog</a></li>
+    <li><a href="config.example.toml">Example config.toml</a></li>
+    <li><a href="catalog-metadata.json">Upstream revision and filtering report</a></li>
+    <li><a href="https://github.com/FlyGoat/elm-models-codex">Source, blacklist, and documentation</a></li>
+  </ul>
+  <p>The updater runs daily at 06:23 UTC. Some models use generic metadata;
+    inclusion does not guarantee Responses or tool compatibility through ELM.</p>
+</main>
+<footer>Includes model metadata from OpenAI Codex, licensed under Apache-2.0.</footer>
+</html>

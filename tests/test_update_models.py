@@ -114,7 +114,7 @@ class CatalogTests(unittest.TestCase):
         provider = config["model_providers"]["elm"]
         self.assertEqual(provider["experimental_bearer_token"], "REPLACE_WITH_YOUR_ELM_API_KEY")
         self.assertEqual(provider["model_catalog_url"],
-                         "https://raw.githubusercontent.com/FlyGoat/elm-models-codex/main/models.json")
+                         "https://flygoat.github.io/elm-models-codex/models.json")
         self.assertNotIn("model_catalog_json", config)
         self.assertEqual(config["web_search"], "live")
         self.assertFalse(provider["supports_standalone_web_search"])

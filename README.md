@@ -6,7 +6,7 @@ for the [ELM API](https://elm.edina.ac.uk/api/v1).
 **Catalog URL:**
 
 ```text
-https://raw.githubusercontent.com/FlyGoat/elm-models-codex/main/models.json
+https://flygoat.github.io/elm-models-codex/models.json
 ```
 
 The updater intersects ELM's live `/models` inventory with the latest stable
@@ -29,7 +29,14 @@ Remove any top-level `model_catalog_json` setting so Codex uses the hosted catal
 Restart existing sessions after changing configuration. The initial catalog and
 remote discovery were tested with Codex 0.165.0. Future updates track the latest
 stable release; update your CLI alongside the catalog or use a catalog URL pinned
-to a known working repository commit.
+to a known working catalog. The project page also provides the example
+configuration and a filtering report:
+<https://flygoat.github.io/elm-models-codex/>.
+
+Codex 0.165.0 sends the provider's bearer token when requesting a remote catalog.
+GitHub's raw-file endpoint rejects requests carrying an ELM token with HTTP 404;
+the project site serves the same JSON through GitHub Pages. No download wrapper
+or manually maintained local catalog is required.
 
 ### ELM web search compatibility
 
@@ -62,12 +69,17 @@ Codex-specific; it is separate from the ordinary OpenAI-compatible `/models` lis
 The [GitHub Action](.github/workflows/update-models.yml) runs daily at **06:23 UTC**,
 on relevant pushes to `main`, and through **Actions → Update model catalog → Run
 workflow**. Pull requests run offline tests only and receive no ELM credentials.
+After each successful update, the workflow deploys the current catalog, example
+config, filtering report, and a small index page to GitHub Pages. Only those
+selected public files are included in the deployment artifact.
 
 Set the repository Actions secret `ELM_API_KEY` to a key allowed to list ELM
 models. The workflow uses its built-in `GITHUB_TOKEN` to read the latest stable
 Codex release and commit changed `models.json` and `catalog-metadata.json` directly
 to `main`. If branch protection prevents bot pushes, allow this automation or
-change the publishing step to open a pull request.
+change the publishing step to open a pull request. Pages must use **GitHub
+Actions** as its publishing source. The deploy job has `pages: write` and
+`id-token: write` permissions for GitHub's deployment action.
 
 The optional manual `codex_ref` input can select a specific upstream release tag
 or commit. Without an override, the next scheduled run returns to the latest
@@ -107,8 +119,10 @@ python3 -m json.tool models.json
 
 Serve `models.json` over HTTPS as `application/json`, accepting query parameters
 such as `?client_version=0.165.0`. Set `model_providers.elm.model_catalog_url` to
-that full URL. GitHub's raw URL already provides the hosted file without Pages or
-an additional deployment.
+that full URL. The default URL uses this repository's GitHub Pages project site.
+The raw source remains available at
+<https://raw.githubusercontent.com/FlyGoat/elm-models-codex/main/models.json> for
+anonymous downloads, but is unsuitable for Codex's authenticated catalog fetch.
 
 ## Upstream attribution
 

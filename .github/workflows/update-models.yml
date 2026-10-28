@@ -16,6 +16,7 @@ on:
       - "tests/**"
       - "blacklist.json"
       - "config.example.toml"
+      - "site/**"
       - ".github/workflows/update-models.yml"
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - "tests/**"
       - "blacklist.json"
       - "config.example.toml"
+      - "site/**"
       - ".github/workflows/update-models.yml"
 
 permissions:
@@ -75,3 +77,33 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Update ELM coding model catalog"
           git push origin HEAD:main
+
+  deploy:
+    needs: update
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # The updater may have committed a new catalog; fetch the current main.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Prepare public files
+        run: |
+          mkdir -p _site
+          cp -- models.json catalog-metadata.json config.example.toml site/index.html _site/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+      - name: Deploy project site
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
