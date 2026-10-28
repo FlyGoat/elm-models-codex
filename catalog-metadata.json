@@ -12,7 +12,6 @@
     "gpt-6.1-sol"
   ],
   "generic_metadata": [
-    "Qwen/Qwen3.5-397B-A17B-FP8",
     "gpt-4.1",
     "gpt-4.1-mini",
     "gpt-4o",
@@ -25,12 +24,153 @@
     "gpt-5.4",
     "gpt-5.4-mini",
     "gpt-5.4-nano",
-    "meta-llama/Llama-3.3-70B-Instruct",
-    "mistralai/Mistral-Small-4-119B-2603",
     "o3",
-    "o3-pro",
-    "utter-project/EuroLLM-22B-Instruct-2512"
+    "o3-pro"
   ],
+  "curated_metadata": {
+    "Qwen/Qwen3.5-397B-A17B-FP8": {
+      "metadata": {
+        "display_name": "Qwen 3.5 397B A17B (FP8)",
+        "description": "Multimodal coding and tool-use model. ELM documents 262,144 context tokens and optional reasoning; native function calls and image input passed small Responses probes.",
+        "context_window": 262144,
+        "max_context_window": 262144,
+        "auto_compact_token_limit": 209715,
+        "input_modalities": [
+          "text",
+          "image"
+        ],
+        "default_reasoning_level": "high",
+        "supported_reasoning_levels": [
+          {
+            "effort": "none",
+            "description": "Disable reasoning, as documented by ELM."
+          },
+          {
+            "effort": "minimal",
+            "description": "ELM's compatibility alias for disabling reasoning."
+          },
+          {
+            "effort": "high",
+            "description": "Enable reasoning for complex coding tasks."
+          }
+        ],
+        "supports_reasoning_summary_parameter": false
+      },
+      "instructions": "Use the supplied function schemas for tool calls, including shell commands. Treat images as task input when supplied. Make focused, reviewable code changes and run relevant checks; never report a test as passed without observing its result.",
+      "sources": [
+        "https://elm.edina.ac.uk/elm/help/proxy-api",
+        "https://huggingface.co/Qwen/Qwen3.5-397B-A17B-FP8",
+        "https://huggingface.co/Qwen/Qwen3.5-397B-A17B-FP8/blob/main/config.json"
+      ],
+      "validation": {
+        "date": "2026-10-28",
+        "responses_function_call": "Observed add(a=2, b=3) as a native function_call output.",
+        "responses_image_input": "Correctly identified a red PNG through input_image with detail=auto.",
+        "responses_reasoning_effort": "minimal and high requests both completed. The probes do not prove that the thinking toggle changed backend execution.",
+        "codex_shell": "Codex 0.165.0 executed a shell command and returned 137 * 29 = 3973 with hosted web search disabled.",
+        "full_context_limit": "Not load-tested; taken from ELM's deployment documentation."
+      },
+      "notes": "Use the documented native 262,144-token deployment limit, not the model card's optional YaRN extension. Summaries remain disabled because reasoning output does not imply support for OpenAI's summary parameter. Compaction at 80 percent is repository policy."
+    },
+    "meta-llama/Llama-3.3-70B-Instruct": {
+      "metadata": {
+        "display_name": "Llama 3.3 70B Instruct",
+        "description": "Text-only multilingual code assistant. ELM documents 128,000 context tokens and no reasoning controls. Native tool calls were not observed in the small ELM Responses probe.",
+        "context_window": 128000,
+        "max_context_window": 128000,
+        "auto_compact_token_limit": 102400,
+        "input_modalities": [
+          "text"
+        ],
+        "default_reasoning_level": null,
+        "supported_reasoning_levels": [],
+        "supports_reasoning_summary_parameter": false
+      },
+      "instructions": "Work in small, explicit coding steps. Use available function tools through their supplied schemas; do not print raw Llama chat delimiters or pretend a JSON message executed a tool. If the endpoint does not produce native tool calls, provide a proposed patch and state that it has not been applied or tested.",
+      "sources": [
+        "https://elm.edina.ac.uk/elm/help/proxy-api",
+        "https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct",
+        "https://github.com/meta-llama/llama-models/blob/main/models/llama3_3/prompt_format.md"
+      ],
+      "validation": {
+        "date": "2026-10-28",
+        "responses_function_call": "Request completed with a message, without a native function_call, despite tool_choice=required. This is a probe result, not proof that all tool use is impossible.",
+        "full_context_limit": "Not load-tested; ELM documents 128,000, which takes precedence over the underlying model's 128K family limit."
+      },
+      "notes": "The publisher documents text-only input and zero-shot function calling. ELM's documented service limit is used exactly. No vision, reasoning levels, or reasoning summaries are advertised. Compaction at 80 percent is repository policy."
+    },
+    "mistralai/Mistral-Small-4-119B-2603": {
+      "metadata": {
+        "display_name": "Mistral Small 4 119B",
+        "description": "Hybrid coding and reasoning model with 262,144 context tokens. Direct Responses function calls passed, but full Codex requests currently fail on the developer role. Image input is temporarily disabled.",
+        "context_window": 262144,
+        "max_context_window": 262144,
+        "auto_compact_token_limit": 209715,
+        "input_modalities": [
+          "text"
+        ],
+        "default_reasoning_level": "high",
+        "supported_reasoning_levels": [
+          {
+            "effort": "none",
+            "description": "Disable reasoning for fast coding edits."
+          },
+          {
+            "effort": "minimal",
+            "description": "ELM's compatibility alias for disabling reasoning."
+          },
+          {
+            "effort": "high",
+            "description": "Enable reasoning for complex coding tasks."
+          }
+        ],
+        "supports_reasoning_summary_parameter": false
+      },
+      "instructions": "Use native function calls with the provided schemas for repository inspection, edits, and checks. Keep final explanations concise and grounded in observed results. For images, report that this catalog currently restricts ELM Responses input to text instead of claiming to have inspected unavailable image content.",
+      "sources": [
+        "https://elm.edina.ac.uk/elm/help/proxy-api",
+        "https://huggingface.co/mistralai/Mistral-Small-4-119B-2603",
+        "https://docs.mistral.ai/models/mistral-small-4-0-26-03"
+      ],
+      "validation": {
+        "date": "2026-10-28",
+        "responses_function_call": "Observed add(a=2, b=3) as a native function_call output.",
+        "responses_reasoning_effort": "A high-effort request completed with reasoning and message output items and the correct arithmetic result.",
+        "codex_shell": "Codex 0.165.0 with high reasoning failed with HTTP 400: Unknown message role: developer. This proxy compatibility issue is not fixed by model metadata.",
+        "responses_image_input": "HTTP 400: 'input_text' is not a valid ChunkTypes. The publisher and ELM document image capability, but the tested Responses path failed; catalog image input remains disabled.",
+        "full_context_limit": "Not load-tested; taken from ELM's deployment documentation."
+      },
+      "notes": "The documented 262,144-token service limit takes precedence over larger positional limits in the checkpoint configuration. Images are a known model capability, but are not enabled for the currently failing ELM Responses conversion. Compaction at 80 percent is repository policy."
+    },
+    "utter-project/EuroLLM-22B-Instruct-2512": {
+      "metadata": {
+        "display_name": "EuroLLM 22B Instruct (2512)",
+        "description": "Text-only multilingual instruction model with 32,768 context tokens. Suitable for short code assistance; native tool calls were not observed in the small ELM Responses probe.",
+        "context_window": 32768,
+        "max_context_window": 32768,
+        "auto_compact_token_limit": 26214,
+        "input_modalities": [
+          "text"
+        ],
+        "default_reasoning_level": null,
+        "supported_reasoning_levels": [],
+        "supports_reasoning_summary_parameter": false
+      },
+      "instructions": "Handle compact coding, explanation, and multilingual documentation tasks. Request only the file sections needed for the current change to stay within the smaller context window. If native function calls are unavailable, provide code or a patch as a proposal and clearly state that files were not changed and tests were not run.",
+      "sources": [
+        "https://elm.edina.ac.uk/elm/help/proxy-api",
+        "https://huggingface.co/utter-project/EuroLLM-22B-Instruct-2512",
+        "https://huggingface.co/utter-project/EuroLLM-22B-Instruct-2512/blob/main/config.json",
+        "https://huggingface.co/utter-project/EuroLLM-22B-Instruct-2512/blob/main/tokenizer_config.json"
+      ],
+      "validation": {
+        "date": "2026-10-28",
+        "responses_function_call": "Request completed with a message, without a native function_call, despite tool_choice=required. The published chat template does not define tools or tool_calls.",
+        "full_context_limit": "Not load-tested; ELM and the publisher both document 32,768 tokens."
+      },
+      "notes": "No native tool-calling training or reasoning controls are claimed. The tokenizer's very large model_max_length sentinel is not used as a real context limit. Compaction at 80 percent is repository policy."
+    }
+  },
   "excluded": [
     {
       "id": "Snowflake/snowflake-arctic-embed-l-v2.0",
@@ -190,5 +330,6 @@
   "upstream_catalog_url": "https://raw.githubusercontent.com/openai/codex/rust-v0.165.0/codex-rs/models-manager/models.json",
   "upstream_catalog_sha256": "6cddd5c5cf5e4496b9cd490d5942e0df90e30d6419fbbd684864cb464e6ace74",
   "elm_models_url": "https://elm.edina.ac.uk/api/v1/models",
-  "catalog_bytes": 398402
+  "catalog_bytes": 400494,
+  "curated_reviewed_at": "2026-10-28"
 }

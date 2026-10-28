@@ -12,8 +12,10 @@ https://flygoat.github.io/elm-models-codex/models.json
 The updater intersects ELM's live `/models` inventory with the latest stable
 [OpenAI Codex release](https://github.com/openai/codex/releases/latest). Exact
 model ID matches retain upstream instructions, context limits, reasoning options,
-and other metadata. Other eligible ELM text models receive conservative generic
-metadata. The catalog does not add models absent from ELM's inventory.
+and other metadata. Four locally hosted models have researched, source-backed
+metadata in [curated-models.json](curated-models.json). Other eligible ELM text
+models receive conservative generic metadata. The catalog does not add models
+absent from ELM's inventory.
 
 ## Configure Codex
 
@@ -59,8 +61,46 @@ controls, vision support, or search capabilities. Their defaults are deliberatel
 conservative. Even models with upstream metadata are not all inference-tested
 through ELM.
 
+### Locally hosted models
+
+The [ELM proxy API documentation](https://elm.edina.ac.uk/elm/help/proxy-api) takes
+precedence for deployment limits and supported reasoning options. Its help content
+was read from ELM's publicly served application bundle because browser navigation
+redirected to university sign-in. Publisher model cards and configurations provide
+additional context. Sources and dated probe results are preserved in the curated
+file and generated metadata report.
+
+| Model | ELM context tokens | Catalog input | Reasoning choices |
+| --- | ---: | --- | --- |
+| [Qwen 3.5 397B A17B FP8](https://huggingface.co/Qwen/Qwen3.5-397B-A17B-FP8) | 262,144 | Text and images | `none`, `minimal`, `high` |
+| [Llama 3.3 70B Instruct](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct) | 128,000 | Text | None advertised |
+| [Mistral Small 4](https://huggingface.co/mistralai/Mistral-Small-4-119B-2603) | 262,144 | Text, temporarily | `none`, `minimal`, `high` |
+| [EuroLLM 22B Instruct](https://huggingface.co/utter-project/EuroLLM-22B-Instruct-2512) | 32,768 | Text | None advertised |
+
+Qwen and Mistral default to `high` for coding. ELM documents `minimal` as an alias
+for disabling reasoning. OpenAI reasoning summaries remain disabled. Full context
+limits have not been load-tested; compaction at 80 percent of each documented limit
+is this repository's policy for reserving working space.
+
+Small ELM Responses probes observed native function calls for Qwen and Mistral.
+Qwen also identified a red test image. Mistral's image request failed with
+`'input_text' is not a valid ChunkTypes`, so image input is disabled in its catalog
+entry despite the documented model capability. Llama and EuroLLM returned messages
+instead of native function calls in the same probe. This does not prove all tool
+use is impossible, but it prevents claiming verified agent operation for them.
+
+An actual Codex 0.165.0 shell-tool check passed for Qwen with hosted web search
+disabled. A full Codex request to Mistral failed with `Unknown message role:
+developer`, despite its direct API function-calling probe passing. This is an ELM
+proxy compatibility issue; the researched metadata does not claim to fix it.
+
+Curated fields are applied after upstream matching, so ELM deployment overrides
+survive automatic regeneration. They never bypass the blacklist or add models not
+listed by ELM. Newly researched changes belong in `curated-models.json`; the
+scheduled job does not scrape model-card prose into configuration automatically.
+
 [catalog-metadata.json](catalog-metadata.json) records the upstream release and
-catalog checksum, included models using exact or generic metadata, and every
+catalog checksum, included models using exact, curated, or generic metadata, and every
 excluded model with its reason. No API credentials are published. This catalog is
 Codex-specific; it is separate from the ordinary OpenAI-compatible `/models` list.
 

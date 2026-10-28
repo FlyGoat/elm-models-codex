@@ -141,9 +141,44 @@ def generic_model(slug: str) -> dict:
     }
 
 
-def build_catalog(inventory, upstream, blacklist):
+def load_curated(document) -> dict:
+    models = document.get("models")
+    if not isinstance(models, dict):
+        raise ValueError("Curated metadata must contain a models object")
+    allowed = set(generic_model("placeholder")) - {
+        "slug", "visibility", "supported_in_api", "use_responses_lite", "model_messages"
+    }
+    for slug, entry in models.items():
+        if not isinstance(slug, str) or not slug or not isinstance(entry, dict):
+            raise ValueError("Invalid curated model entry")
+        metadata = entry.get("metadata")
+        sources = entry.get("sources")
+        if not isinstance(metadata, dict) or not metadata or set(metadata) - allowed:
+            raise ValueError(f"Invalid curated metadata fields for {slug}")
+        if not isinstance(sources, list) or not sources or any(
+            not isinstance(url, str) or not url.startswith("https://") for url in sources
+        ):
+            raise ValueError(f"Curated model {slug} needs HTTPS source references")
+        context = metadata.get("context_window")
+        maximum = metadata.get("max_context_window")
+        compact = metadata.get("auto_compact_token_limit")
+        if any(type(value) is not int or value <= 0 for value in (context, maximum, compact)):
+            raise ValueError(f"Curated model {slug} needs positive context/compaction limits")
+        if not compact < context <= maximum:
+            raise ValueError(f"Inconsistent curated context limits for {slug}")
+        if metadata.get("input_modalities") not in (["text"], ["text", "image"]):
+            raise ValueError(f"Invalid input modalities for {slug}")
+        if not isinstance(entry.get("instructions"), str) or not entry["instructions"].strip():
+            raise ValueError(f"Curated model {slug} needs coding instructions")
+    return models
+
+
+def build_catalog(inventory, upstream, blacklist, curated_document=None):
     ids = model_ids(inventory)
     rules = load_rules(blacklist)
+    curated_models = load_curated(
+        curated_document if curated_document is not None else {"models": {}}
+    )
     entries = upstream.get("models")
     if not isinstance(entries, list) or not entries:
         raise ValueError("Upstream catalog must contain a nonempty models array")
@@ -154,7 +189,7 @@ def build_catalog(inventory, upstream, blacklist):
             raise ValueError("Upstream catalog has invalid or duplicate slugs")
         by_slug[slug] = entry
 
-    models, excluded, native, generic = [], [], [], []
+    models, excluded, native, generic, curated = [], [], [], [], {}
     for slug in ids:
         rule = next(
             (rule for rule in rules if fnmatch.fnmatchcase(slug.lower(), rule["pattern"].lower())),
@@ -168,7 +203,15 @@ def build_catalog(inventory, upstream, blacklist):
             native.append(slug)
         else:
             model = generic_model(slug)
-            generic.append(slug)
+            if slug not in curated_models:
+                generic.append(slug)
+        if slug in curated_models:
+            entry = curated_models[slug]
+            model.update(copy.deepcopy(entry["metadata"]))
+            model["model_messages"] = {
+                "instructions_template": GENERIC_INSTRUCTIONS + " " + entry["instructions"]
+            }
+            curated[slug] = copy.deepcopy(entry)
         # ELM implements hosted search in /responses, but not /alpha/search.
         model["use_responses_lite"] = False
         models.append(model)
@@ -180,6 +223,7 @@ def build_catalog(inventory, upstream, blacklist):
         "included_model_count": len(models),
         "upstream_metadata": native,
         "generic_metadata": generic,
+        "curated_metadata": curated,
         "excluded": excluded,
         "compatibility_override": {"use_responses_lite": False},
     }
@@ -210,6 +254,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=ROOT / "models.json")
     parser.add_argument("--metadata", type=Path, default=ROOT / "catalog-metadata.json")
     parser.add_argument("--blacklist", type=Path, default=ROOT / "blacklist.json")
+    parser.add_argument("--curated", type=Path, default=ROOT / "curated-models.json")
     parser.add_argument("--codex-ref", default=os.environ.get("CODEX_REF") or None)
     parser.add_argument("--elm-models-file", type=Path, help="Use a saved /models response")
     parser.add_argument("--upstream-catalog-file", type=Path, help="Use a saved Codex catalog")
@@ -230,7 +275,8 @@ def main() -> int:
         ref = args.codex_ref or latest_codex_ref()
         upstream, source_url = fetch_upstream(ref)
     blacklist = json.loads(args.blacklist.read_text())
-    catalog, metadata = build_catalog(inventory, upstream, blacklist)
+    curated = json.loads(args.curated.read_text())
+    catalog, metadata = build_catalog(inventory, upstream, blacklist, curated)
     encoded = encode_catalog(catalog)
     metadata.update({
         "codex_ref": ref,
@@ -240,6 +286,7 @@ def main() -> int:
         ).hexdigest(),
         "elm_models_url": f"{ELM_BASE}/models",
         "catalog_bytes": len(encoded),
+        "curated_reviewed_at": curated.get("reviewed_at"),
     })
     # Finish all fetching, validation, and serialization before changing artifacts.
     metadata_bytes = (json.dumps(metadata, indent=2, ensure_ascii=False) + "\n").encode()
@@ -247,7 +294,8 @@ def main() -> int:
     write_if_changed(args.metadata, metadata_bytes)
     print(
         f"{ref}: {metadata['included_model_count']}/{metadata['elm_model_count']} models; "
-        f"{len(metadata['excluded'])} blacklisted; {len(metadata['generic_metadata'])} generic; "
+        f"{len(metadata['excluded'])} blacklisted; {len(metadata['curated_metadata'])} curated; "
+        f"{len(metadata['generic_metadata'])} generic; "
         f"{len(encoded)} bytes"
     )
     return 0

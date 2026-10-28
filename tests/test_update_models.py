@@ -79,6 +79,58 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(len(catalog["models"]), 1)
         self.assertEqual(report["excluded"][0]["id"], "GPT-AUDIO")
 
+    def test_curated_models_use_elm_limits_and_retain_provenance(self):
+        curated = json.loads((ROOT / "curated-models.json").read_text())
+        expected = {
+            "Qwen/Qwen3.5-397B-A17B-FP8": (262144, ["text", "image"], "high"),
+            "meta-llama/Llama-3.3-70B-Instruct": (128000, ["text"], None),
+            "mistralai/Mistral-Small-4-119B-2603": (262144, ["text"], "high"),
+            "utter-project/EuroLLM-22B-Instruct-2512": (32768, ["text"], None),
+        }
+        catalog, report = updater.build_catalog(
+            inventory(*expected), self.upstream, self.blacklist, curated
+        )
+        self.assertEqual(report["generic_metadata"], [])
+        self.assertEqual(set(report["curated_metadata"]), set(expected))
+        for model in catalog["models"]:
+            context, modalities, effort = expected[model["slug"]]
+            self.assertEqual(model["context_window"], context)
+            self.assertEqual(model["max_context_window"], context)
+            self.assertEqual(model["auto_compact_token_limit"], context * 80 // 100)
+            self.assertEqual(model["input_modalities"], modalities)
+            self.assertEqual(model["default_reasoning_level"], effort)
+            self.assertFalse(model["use_responses_lite"])
+            self.assertFalse(model["supports_reasoning_summary_parameter"])
+            self.assertIn("validation", report["curated_metadata"][model["slug"]])
+            self.assertNotIn("generic metadata", model["description"])
+
+    def test_curated_entry_overrides_upstream_service_limits_without_mutation(self):
+        curated = json.loads((ROOT / "curated-models.json").read_text())
+        slug = "meta-llama/Llama-3.3-70B-Instruct"
+        upstream = {"models": [updater.generic_model(slug)]}
+        upstream["models"][0]["context_window"] = 131072
+        upstream["models"][0]["use_responses_lite"] = True
+        before = copy.deepcopy(upstream)
+        catalog, _ = updater.build_catalog(inventory(slug), upstream, self.blacklist, curated)
+        self.assertEqual(catalog["models"][0]["context_window"], 128000)
+        self.assertEqual(upstream, before)
+
+    def test_curated_data_cannot_override_identity_or_filtering(self):
+        document = json.loads((ROOT / "curated-models.json").read_text())
+        entry = copy.deepcopy(next(iter(document["models"].values())))
+        with self.assertRaises(ValueError):
+            updater.load_curated({"models": {"x": {**entry, "sources": []}}})
+        entry["metadata"]["slug"] = "replaced-id"
+        with self.assertRaises(ValueError):
+            updater.load_curated({"models": {"x": entry}})
+        del entry["metadata"]["slug"]
+        catalog, report = updater.build_catalog(
+            inventory("gpt-audio", "gpt-6.1-sol"), self.upstream, self.blacklist,
+            {"models": {"gpt-audio": entry}},
+        )
+        self.assertEqual([model["slug"] for model in catalog["models"]], ["gpt-6.1-sol"])
+        self.assertEqual(report["curated_metadata"], {})
+
     def test_bad_inputs_and_empty_result_rejected(self):
         invalid = [
             {}, {"data": []}, inventory("duplicate", "duplicate"),
