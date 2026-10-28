@@ -22,7 +22,8 @@
           "effort": "high",
           "description": "Enabled"
         }
-      ]
+      ],
+      "supports_image_detail_original": true
     },
     "meta-llama/Llama-3.3-70B-Instruct": {
       "display_name": "Llama 3.3 70B Instruct",
