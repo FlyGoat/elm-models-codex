@@ -1,0 +1,77 @@
+name: Update model catalog
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+    inputs:
+      codex_ref:
+        description: "Optional Codex tag or commit; blank uses the latest stable release"
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - "blacklist.json"
+      - "config.example.toml"
+      - ".github/workflows/update-models.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - "blacklist.json"
+      - "config.example.toml"
+      - ".github/workflows/update-models.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - run: python -m unittest discover -s tests -v
+
+  update:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Build catalog from ELM and Codex upstream
+        env:
+          ELM_API_KEY: ${{ secrets.ELM_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          CODEX_REF: ${{ inputs.codex_ref }}
+        run: python scripts/update_models.py
+      - name: Commit changed generated files
+        run: |
+          git add -- models.json catalog-metadata.json
+          if git diff --cached --quiet; then
+            echo "Catalog is already current."
+            exit 0
+          fi
+          git diff --cached --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update ELM coding model catalog"
+          git push origin HEAD:main

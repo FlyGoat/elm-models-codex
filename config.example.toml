@@ -1,0 +1,15 @@
+model = "gpt-6.1-sol"
+model_provider = "elm"
+web_search = "live"
+
+[model_providers.elm]
+name = "ELM"
+base_url = "https://elm.edina.ac.uk/api/v1"
+wire_api = "responses"
+model_catalog_url = "https://raw.githubusercontent.com/FlyGoat/elm-models-codex/main/models.json"
+experimental_bearer_token = "REPLACE_WITH_YOUR_ELM_API_KEY"
+# ELM supports hosted search through /responses, not /alpha/search.
+supports_standalone_web_search = false
+
+[features]
+standalone_web_search = false

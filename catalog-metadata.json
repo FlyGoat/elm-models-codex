@@ -1,0 +1,194 @@
+{
+  "elm_model_count": 56,
+  "included_model_count": 26,
+  "upstream_metadata": [
+    "gpt-5.5",
+    "gpt-5.6-luna",
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-6-astra",
+    "gpt-6-luna",
+    "gpt-6-sol",
+    "gpt-6.1-sol"
+  ],
+  "generic_metadata": [
+    "Qwen/Qwen3.5-397B-A17B-FP8",
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-5-mini",
+    "gpt-5-nano",
+    "gpt-5.1",
+    "gpt-5.2",
+    "gpt-5.3-codex",
+    "gpt-5.4",
+    "gpt-5.4-mini",
+    "gpt-5.4-nano",
+    "meta-llama/Llama-3.3-70B-Instruct",
+    "mistralai/Mistral-Small-4-119B-2603",
+    "o3",
+    "o3-pro",
+    "utter-project/EuroLLM-22B-Instruct-2512"
+  ],
+  "excluded": [
+    {
+      "id": "Snowflake/snowflake-arctic-embed-l-v2.0",
+      "reason": "Embedding model",
+      "pattern": "*embed*"
+    },
+    {
+      "id": "codex-auto-review",
+      "reason": "Internal review model",
+      "pattern": "codex-auto-review*"
+    },
+    {
+      "id": "gpt-3.5-turbo-instruct",
+      "reason": "Legacy completion model",
+      "pattern": "gpt-3.5-turbo-instruct*"
+    },
+    {
+      "id": "gpt-4o-audio-preview",
+      "reason": "Audio-specific model",
+      "pattern": "*audio*"
+    },
+    {
+      "id": "gpt-4o-mini-audio-preview",
+      "reason": "Audio-specific model",
+      "pattern": "*audio*"
+    },
+    {
+      "id": "gpt-4o-mini-search-preview",
+      "reason": "Search-specific model",
+      "pattern": "*search-preview*"
+    },
+    {
+      "id": "gpt-4o-mini-transcribe",
+      "reason": "Transcription model",
+      "pattern": "*transcrib*"
+    },
+    {
+      "id": "gpt-4o-mini-tts",
+      "reason": "Text-to-speech model",
+      "pattern": "*tts*"
+    },
+    {
+      "id": "gpt-4o-search-preview",
+      "reason": "Search-specific model",
+      "pattern": "*search-preview*"
+    },
+    {
+      "id": "gpt-4o-transcribe",
+      "reason": "Transcription model",
+      "pattern": "*transcrib*"
+    },
+    {
+      "id": "gpt-4o-transcribe-diarize",
+      "reason": "Transcription model",
+      "pattern": "*transcrib*"
+    },
+    {
+      "id": "gpt-audio",
+      "reason": "Audio-specific model",
+      "pattern": "*audio*"
+    },
+    {
+      "id": "gpt-image-2",
+      "reason": "Image generation model",
+      "pattern": "gpt-image*"
+    },
+    {
+      "id": "gpt-live-transcribe",
+      "reason": "Transcription model",
+      "pattern": "*transcrib*"
+    },
+    {
+      "id": "gpt-realtime-2.1",
+      "reason": "Realtime speech model",
+      "pattern": "*realtime*"
+    },
+    {
+      "id": "gpt-realtime-2.1-mini",
+      "reason": "Realtime speech model",
+      "pattern": "*realtime*"
+    },
+    {
+      "id": "gpt-realtime-mini",
+      "reason": "Realtime speech model",
+      "pattern": "*realtime*"
+    },
+    {
+      "id": "gpt-realtime-translate",
+      "reason": "Realtime speech model",
+      "pattern": "*realtime*"
+    },
+    {
+      "id": "gpt-realtime-whisper",
+      "reason": "Realtime speech model",
+      "pattern": "*realtime*"
+    },
+    {
+      "id": "gpt-transcribe",
+      "reason": "Transcription model",
+      "pattern": "*transcrib*"
+    },
+    {
+      "id": "ifmain/moderation_by_embeddings",
+      "reason": "Embedding model",
+      "pattern": "*embedding*"
+    },
+    {
+      "id": "meta-llama/Llama-Guard-3-8B",
+      "reason": "Safety classification model",
+      "pattern": "*llama-guard*"
+    },
+    {
+      "id": "nemotron_moderator",
+      "reason": "Moderation model",
+      "pattern": "*moderator*"
+    },
+    {
+      "id": "o4-mini-deep-research",
+      "reason": "Specialized research model",
+      "pattern": "*deep-research*"
+    },
+    {
+      "id": "omni-moderation-latest",
+      "reason": "Moderation model",
+      "pattern": "*moderation*"
+    },
+    {
+      "id": "text-embedding-3-large",
+      "reason": "Embedding model",
+      "pattern": "*embedding*"
+    },
+    {
+      "id": "text-embedding-3-small",
+      "reason": "Embedding model",
+      "pattern": "*embedding*"
+    },
+    {
+      "id": "tts-1",
+      "reason": "Text-to-speech model",
+      "pattern": "*tts*"
+    },
+    {
+      "id": "tts-1-hd",
+      "reason": "Text-to-speech model",
+      "pattern": "*tts*"
+    },
+    {
+      "id": "whisper-1",
+      "reason": "Speech recognition model",
+      "pattern": "*whisper*"
+    }
+  ],
+  "compatibility_override": {
+    "use_responses_lite": false
+  },
+  "codex_ref": "rust-v0.165.0",
+  "upstream_catalog_url": "https://raw.githubusercontent.com/openai/codex/rust-v0.165.0/codex-rs/models-manager/models.json",
+  "upstream_catalog_sha256": "6cddd5c5cf5e4496b9cd490d5942e0df90e30d6419fbbd684864cb464e6ace74",
+  "elm_models_url": "https://elm.edina.ac.uk/api/v1/models",
+  "catalog_bytes": 398402
+}
