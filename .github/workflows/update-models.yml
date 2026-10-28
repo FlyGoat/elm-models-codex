@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: "23 6 * * *"
   workflow_dispatch:
-    inputs:
-      codex_ref:
-        description: "Optional Codex tag or commit; blank uses the latest stable release"
-        required: false
-        type: string
   push:
     branches: [main]
     paths:
@@ -65,11 +60,10 @@ jobs:
         env:
           ELM_API_KEY: ${{ secrets.ELM_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-          CODEX_REF: ${{ inputs.codex_ref }}
         run: python scripts/update_models.py
       - name: Commit changed generated files
         run: |
-          git add -- models.json catalog-metadata.json
+          git add -- models.json
           if git diff --cached --quiet; then
             echo "Catalog is already current."
             exit 0
@@ -101,7 +95,7 @@ jobs:
       - name: Prepare public files
         run: |
           mkdir -p _site
-          cp -- models.json catalog-metadata.json config.example.toml site/index.html _site/
+          cp -- models.json config.example.toml site/index.html _site/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

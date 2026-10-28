@@ -1,22 +1,19 @@
-{
-  "rules": [
-    {"pattern": "*audio*", "reason": "Audio-specific model"},
-    {"pattern": "*realtime*", "reason": "Realtime speech model"},
-    {"pattern": "*transcrib*", "reason": "Transcription model"},
-    {"pattern": "*whisper*", "reason": "Speech recognition model"},
-    {"pattern": "*tts*", "reason": "Text-to-speech model"},
-    {"pattern": "*embedding*", "reason": "Embedding model"},
-    {"pattern": "*embed*", "reason": "Embedding model"},
-    {"pattern": "*moderation*", "reason": "Moderation model"},
-    {"pattern": "*moderator*", "reason": "Moderation model"},
-    {"pattern": "*llama-guard*", "reason": "Safety classification model"},
-    {"pattern": "gpt-image*", "reason": "Image generation model"},
-    {"pattern": "dall-e*", "reason": "Image generation model"},
-    {"pattern": "*search-preview*", "reason": "Search-specific model"},
-    {"pattern": "*deep-research*", "reason": "Specialized research model"},
-    {"pattern": "codex-auto-review*", "reason": "Internal review model"},
-    {"pattern": "gpt-3.5-turbo-instruct*", "reason": "Legacy completion model"},
-    {"pattern": "*davinci*", "reason": "Legacy completion model"},
-    {"pattern": "*babbage*", "reason": "Legacy completion model"}
-  ]
-}
+[
+  "*audio*",
+  "*realtime*",
+  "*transcrib*",
+  "*whisper*",
+  "*tts*",
+  "*embed*",
+  "*moderation*",
+  "*moderator*",
+  "*llama-guard*",
+  "gpt-image*",
+  "dall-e*",
+  "*search-preview*",
+  "*deep-research*",
+  "codex-auto-review*",
+  "gpt-3.5-turbo-instruct*",
+  "*davinci*",
+  "*babbage*"
+]

@@ -7,4 +7,3 @@ Copyright OpenAI. Licensed under the Apache License, Version 2.0.
 Modifications: intersect upstream model metadata with the ELM inventory; exclude
 models using blacklist.json; set use_responses_lite=false for ELM compatibility;
 provide generic metadata for eligible models absent from the upstream catalog.
-The precise upstream revision and source checksum are in catalog-metadata.json.

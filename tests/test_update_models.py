@@ -47,7 +47,7 @@ class CatalogTests(unittest.TestCase):
         ]
         catalog, report = self.build(*(specialists + coding))
         self.assertEqual({model["slug"] for model in catalog["models"]}, set(coding))
-        self.assertEqual({item["id"] for item in report["excluded"]}, set(specialists))
+        self.assertEqual(set(report["excluded"]), set(specialists))
         self.assertEqual(report["elm_model_count"], len(specialists + coding))
 
     def test_upstream_metadata_preserved_except_required_elm_override(self):
@@ -77,9 +77,9 @@ class CatalogTests(unittest.TestCase):
     def test_case_insensitive_blacklist(self):
         catalog, report = self.build("GPT-AUDIO", "gpt-6.1-sol")
         self.assertEqual(len(catalog["models"]), 1)
-        self.assertEqual(report["excluded"][0]["id"], "GPT-AUDIO")
+        self.assertEqual(report["excluded"][0], "GPT-AUDIO")
 
-    def test_curated_models_use_elm_limits_and_retain_provenance(self):
+    def test_curated_models_use_elm_settings(self):
         curated = json.loads((ROOT / "curated-models.json").read_text())
         expected = {
             "Qwen/Qwen3.5-397B-A17B-FP8": (262144, ["text", "image"], "high"),
@@ -101,7 +101,6 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(model["default_reasoning_level"], effort)
             self.assertFalse(model["use_responses_lite"])
             self.assertFalse(model["supports_reasoning_summary_parameter"])
-            self.assertIn("validation", report["curated_metadata"][model["slug"]])
             self.assertNotIn("generic metadata", model["description"])
 
     def test_curated_entry_overrides_upstream_service_limits_without_mutation(self):
@@ -115,15 +114,9 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(catalog["models"][0]["context_window"], 128000)
         self.assertEqual(upstream, before)
 
-    def test_curated_data_cannot_override_identity_or_filtering(self):
+    def test_curated_data_does_not_bypass_filtering(self):
         document = json.loads((ROOT / "curated-models.json").read_text())
-        entry = copy.deepcopy(next(iter(document["models"].values())))
-        with self.assertRaises(ValueError):
-            updater.load_curated({"models": {"x": {**entry, "sources": []}}})
-        entry["metadata"]["slug"] = "replaced-id"
-        with self.assertRaises(ValueError):
-            updater.load_curated({"models": {"x": entry}})
-        del entry["metadata"]["slug"]
+        entry = next(iter(document["models"].values()))
         catalog, report = updater.build_catalog(
             inventory("gpt-audio", "gpt-6.1-sol"), self.upstream, self.blacklist,
             {"models": {"gpt-audio": entry}},
@@ -144,7 +137,7 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             updater.build_catalog(inventory("gpt-6.1-sol"), {"models": []}, self.blacklist)
         with self.assertRaises(ValueError):
-            updater.build_catalog(inventory("gpt-6.1-sol"), self.upstream, {"rules": [{}]})
+            updater.build_catalog(inventory("gpt-6.1-sol"), self.upstream, [None])
 
     def test_http_body_limit_counts_utf8_bytes(self):
         with patch.object(updater, "MAX_CATALOG_BYTES", 100):
